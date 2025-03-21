@@ -1,46 +1,29 @@
-import { Conversation, ChatSettings } from "@/types/chat";
 
-const CONVERSATIONS_KEY = "claude-chatbot-conversations";
+import { Message, ChatSettings } from "@/types/chat";
+
+const MESSAGES_KEY = "claude-chatbot-messages";
 const SETTINGS_KEY = "claude-chatbot-settings";
-const CURRENT_CONVERSATION_KEY = "claude-chatbot-current-conversation";
 
 export const chatStorage = {
-  saveConversations(conversations: Conversation[]): void {
-    localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+  saveMessages(messages: Message[]): void {
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
   },
 
-  getConversations(): Conversation[] {
-    const data = localStorage.getItem(CONVERSATIONS_KEY);
+  getMessages(): Message[] {
+    const data = localStorage.getItem(MESSAGES_KEY);
     if (!data) return [];
     
     try {
-      const parsed = JSON.parse(data) as Conversation[];
+      const parsed = JSON.parse(data) as Message[];
       // Convert string dates back to Date objects
-      return parsed.map(convo => ({
-        ...convo,
-        createdAt: new Date(convo.createdAt),
-        updatedAt: new Date(convo.updatedAt),
-        messages: convo.messages.map(msg => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }))
+      return parsed.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
       }));
     } catch (error) {
-      console.error("Error parsing conversations from storage:", error);
+      console.error("Error parsing messages from storage:", error);
       return [];
     }
-  },
-
-  saveCurrentConversationId(id: string | null): void {
-    if (id) {
-      localStorage.setItem(CURRENT_CONVERSATION_KEY, id);
-    } else {
-      localStorage.removeItem(CURRENT_CONVERSATION_KEY);
-    }
-  },
-
-  getCurrentConversationId(): string | null {
-    return localStorage.getItem(CURRENT_CONVERSATION_KEY);
   },
 
   saveSettings(settings: ChatSettings): void {
@@ -66,9 +49,12 @@ export const chatStorage = {
     }
   },
 
+  clearMessages(): void {
+    localStorage.removeItem(MESSAGES_KEY);
+  },
+
   clearAll(): void {
-    localStorage.removeItem(CONVERSATIONS_KEY);
-    localStorage.removeItem(CURRENT_CONVERSATION_KEY);
-    // Optionally keep settings: localStorage.removeItem(SETTINGS_KEY);
+    localStorage.removeItem(MESSAGES_KEY);
+    localStorage.removeItem(SETTINGS_KEY);
   }
 };
